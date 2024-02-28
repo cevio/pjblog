@@ -11,7 +11,7 @@ npm-debug.log
 .vscode
 tsconfig.tsbuildinfo
 report.*
-# dist
+dist
 *.lerna_backup
 test.js
 bak.ts
@@ -24,3 +24,4 @@ pnpm-lock.yaml
 !templates/**/dist
 temp_data_schema
 test.mjs
+logs

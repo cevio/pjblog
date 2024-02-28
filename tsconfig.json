@@ -15,12 +15,12 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "typeRoots": [
-      "src"
-    ],
-    "types": [
-      "env"
-    ]
+    // "typeRoots": [
+    //   "src"
+    // ],
+    // "types": [
+    //   "env"
+    // ]
   },
   "exclude": [
     "node_modules/*"
