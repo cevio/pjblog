@@ -1,0 +1,20 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "/Users/evioshen/code/github/pjblog/kkk/logs/.2b9a176582fe3e1d4ef8afb16c403adc0694d32a-audit.json",
+    "files": [
+        {
+            "date": 1709049295958,
+            "name": "/Users/evioshen/code/github/pjblog/kkk/logs/2024-02-27.log",
+            "hash": "a5ccb5a1ab9d7c66e5a94e60115489db92f7b38407dd62154db0d57b3a3495b2"
+        },
+        {
+            "date": 1709113908987,
+            "name": "/Users/evioshen/code/github/pjblog/kkk/logs/2024-02-28.log",
+            "hash": "0db51c4dfcfb00d35a1e5ac2f5b3d3f5c31a4349c5214b664008e2be55efe7ee"
+        }
+    ],
+    "hashType": "sha256"
+}
