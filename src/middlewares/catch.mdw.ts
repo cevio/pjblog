@@ -37,6 +37,7 @@ export async function NormalErrorCatch(ctx: Context, next: Next) {
   } catch (e) {
     const logger = await create(Logger);
     logger.error(e.message);
+    ctx.status = e.status || ctx.status || 500;
     ctx.body = e.message;
   }
 }

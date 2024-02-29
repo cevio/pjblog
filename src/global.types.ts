@@ -11,6 +11,7 @@
 'use strict';
 
 import { HttpProps } from '@zille/http';
+import { Context } from 'koa';
 import { DataSource, QueryRunner } from 'typeorm';
 
 export type DataBaseConnection = DataSource | QueryRunner;
@@ -79,4 +80,13 @@ export interface SystemConfigs {
   mediaCommentWithPageSize: number,
   mediaRelativeWithPageSize: number,
   mediaCommentWithChildrenPageSize: number,
+}
+
+export interface LoginsProps {
+  id: string,
+  name: string,
+  description: string,
+  version: string,
+  icon?: string,
+  redirect(ctx: Context, redirect_url?: string): unknown | Promise<unknown>,
 }
