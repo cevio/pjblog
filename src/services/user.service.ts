@@ -10,7 +10,7 @@
 
 'use strict';
 
-import { Meta, Service } from '@zille/service';
+import { Service } from '@zille/service';
 import { DataBaseConnnectionNameSpace } from '../middlewares/database.mdw';
 import { DataBaseConnection } from '../global.types';
 import { BlogUserEntity } from '../entities/user.entity';
@@ -33,11 +33,11 @@ export class UserService extends Service {
   @Service.Inject(Storage)
   private readonly cache: Storage;
 
-  private createUserLoginTokenKeyPath(token: string) {
+  public createUserLoginTokenKeyPath(token: string) {
     return this.env.toPath('login:token:' + token);
   }
 
-  private createUserAccountLoginKeyPath(account: string) {
+  public createUserAccountLoginKeyPath(account: string) {
     return this.env.toPath('login:account:' + account);
   }
 
@@ -87,8 +87,8 @@ export class UserService extends Service {
 
   public async getMany(page: number, size: number, options: {
     keyword?: string,
-    forbiden?: true,
-    admin?: true
+    forbiden?: boolean,
+    admin?: boolean
   } = {}) {
     const sql = this.getRepository()
       .createQueryBuilder('u')
