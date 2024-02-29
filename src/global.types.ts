@@ -11,6 +11,9 @@
 'use strict';
 
 import { HttpProps } from '@zille/http';
+import { DataSource, QueryRunner } from 'typeorm';
+
+export type DataBaseConnection = DataSource | QueryRunner;
 
 export interface BlogProps {
   cache: {

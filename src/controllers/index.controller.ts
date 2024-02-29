@@ -11,7 +11,6 @@
 'use strict';
 
 import { Controller, Response } from '@zille/http-controller';
-import { abc } from '../caches/test.cache';
 import { JSONErrorCatch } from '../middlewares/catch.mdw';
 import { Swagger, SwaggerWithGlobal, createApiSchema } from '../lib/swagger/swagger';
 import { Schema } from '../lib/schema/schema.lib';
@@ -28,15 +27,7 @@ import { Schema } from '../lib/schema/schema.lib';
   path.addResponse(200, '请求成功').schema(createApiSchema(new Schema.String()));
 })
 export default class extends Controller {
-  @Controller.Inject(abc)
-  private readonly abc: abc;
-
   public async main() {
-    // throw new Error('ddd')
-    const value = await this.abc.read({
-      id: 3,
-      oo: 'use'
-    }, 1)
-    return Response.html('Hello world: ' + value);
+    return Response.html('Hello world');
   }
 }

@@ -95,7 +95,7 @@ export const SystemConfigsSchema = new Schema.Object()
       .required()
   )
   .set('swagger',
-    new Schema.Bool(false)
+    new Schema.Bool(true)
       .title('Swagger')
       .description('是否开放 Swagger 接口')
       .labels(['禁止', '开放'])
