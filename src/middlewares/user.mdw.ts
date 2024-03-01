@@ -22,13 +22,11 @@ import { Exception } from "../lib/exception";
 
 declare module 'koa' {
   interface BaseContext {
-    state: {
-      user: BlogUserEntity,
-    }
+    user: BlogUserEntity,
   }
 }
 
-export const Me = Controller.Context(ctx => ctx.state.user);
+export const Me = Controller.Context(ctx => ctx.user);
 export const UserLoginInfoMiddleware: Middleware = async (ctx, next) => {
   let token = ctx.cookies.get('authorization', { signed: true });
   if (!token) token = ctx.get('authorization');

@@ -4,26 +4,27 @@ import { DataBaseMiddleware } from "../../../middlewares/database.mdw";
 import { UserAdminableMiddleware } from "../../../middlewares/user.mdw";
 import { Swagger, SwaggerWithMedia, createApiSchema } from "../../../lib/swagger/swagger";
 import { Schema } from "../../../lib/schema/schema.lib";
-import { Media_Types } from "../../../lib/media.lib";
-import { MediaSchema } from "../../../schemas/media.schema";
 import { MediaService } from "../../../services/media.service";
+import { MediaMiddleware } from "../../../middlewares/media.mdw";
+import { BlogMediaEntity } from "../../../entities/media.entity";
+import { MediaTagService } from "../../../services/media.tag.service";
+import { Media } from "../../../applications/media.app";
+import { MediaArticleService } from "../../../services/media.article.service";
+import { Exception } from "../../../lib/exception";
 
 @Controller.Injectable()
 @Controller.Method('DELETE')
-@Controller.Middleware(JSONErrorCatch, DataBaseMiddleware(), UserAdminableMiddleware)
+@Controller.Middleware(JSONErrorCatch, DataBaseMiddleware(true), UserAdminableMiddleware, MediaMiddleware(ctx => ctx.params.token))
 @Swagger.Definition(SwaggerWithMedia, path => {
   path
-    .summary('获取媒体列表')
-    .description('获取媒体列表')
+    .summary('删除媒体')
+    .description('删除媒体')
     .produces('application/json');
 
-  path.addParameter('page', '页码').In('query').required().schema(new Schema.Number(1));
-  path.addParameter('size', '每页数').In('query').required().schema(new Schema.Number(10));
-  path.addParameter('category', '分类 ID').In('query').schema(new Schema.Number());
-  path.addParameter('type', '类型').In('query').schema(new Schema.String().enum(...Array.from(Media_Types.values())));
+  path.addParameter('token', 'token').In('path').required().schema(new Schema.String());
   path.addResponse(200, '请求成功').schema(
     createApiSchema(
-      new Schema.Array().items(MediaSchema())
+      new Schema.Number()
     )
   );
 })
@@ -31,7 +32,30 @@ export default class extends Controller<'token'> {
   @Controller.Inject(MediaService)
   private readonly media: MediaService;
 
-  public async main() {
+  @Controller.Inject(MediaTagService)
+  private readonly tag: MediaTagService;
+
+  @Controller.Inject(MediaArticleService)
+  private readonly article: MediaArticleService;
+
+  @Controller.Inject(Media)
+  private readonly service: Media;
+
+  public async main(
+    @Media.One media: BlogMediaEntity,
+    @Controller.Store store: Map<any, any>,
+  ) {
+    await this.media.del(media);
+    await this.tag.del();
+
+    if (media.media_type === 'article') {
+      const article = await this.article.getOne();
+      if (!article) throw new Exception(804, '文章不存在');
+      await this.article.del();
+    }
+
+    await this.service.executeDeletion(media.media_type, media, store);
+
     // 未完成
     return Response.json(Date.now());
   }

@@ -129,11 +129,12 @@ class Blog extends Component {
     const http = await this.use(Http);
     this.Logger.http('http://127.0.0.1:' + options.http.port);
     await LoadControllers(controllers, http.app);
+    this.Logger.debug(`System controllers -> \`${controllers}\``);
     for (const [code, directory] of directories.entries()) {
       await LoadControllers(directory, http.app, {
         prefix: '/-/plugin/' + code,
       })
-      this.Logger.notice('Load controllers from plugin: ' + directory);
+      this.Logger.debug(`Plugin controllers -> \`${directory}\``);
     }
 
     this.Logger.info('PJBlog server started.');

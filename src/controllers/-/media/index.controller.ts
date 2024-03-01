@@ -4,7 +4,6 @@ import { DataBaseMiddleware } from "../../../middlewares/database.mdw";
 import { UserAdminableMiddleware } from "../../../middlewares/user.mdw";
 import { Swagger, SwaggerWithMedia, createApiSchema } from "../../../lib/swagger/swagger";
 import { Schema } from "../../../lib/schema/schema.lib";
-import { Media_Types } from "../../../lib/media.lib";
 import { MediaSchema } from "../../../schemas/media.schema";
 import { TransformStringToNumber } from "../../../utils";
 import { MediaService } from "../../../services/media.service";
@@ -21,10 +20,10 @@ import { MediaService } from "../../../services/media.service";
   path.addParameter('page', '页码').In('query').required().schema(new Schema.Number(1));
   path.addParameter('size', '每页数').In('query').required().schema(new Schema.Number(10));
   path.addParameter('category', '分类 ID').In('query').schema(new Schema.Number());
-  path.addParameter('type', '类型').In('query').schema(new Schema.String().enum(...Array.from(Media_Types.values())));
+  path.addParameter('type', '类型').In('query').schema(new Schema.String());
   path.addResponse(200, '请求成功').schema(
     createApiSchema(
-      new Schema.Array().items(MediaSchema())
+      new Schema.Array().items(MediaSchema)
     )
   );
 })
