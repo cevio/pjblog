@@ -16,11 +16,6 @@ import { generate } from 'randomstring';
 import pkg from 'crypto-js';
 const { MD5 } = pkg;
 
-export enum MEDIA_TYPE {
-  PAGE,
-  ARTICLE,
-}
-
 @Entity({ name: 'media' })
 export class BlogMediaEntity {
   @PrimaryGeneratedColumn()
@@ -75,11 +70,12 @@ export class BlogMediaEntity {
   public media_read_count: number;
 
   @Column({
-    type: 'integer',
+    type: 'varchar',
+    length: 250,
     comment: '类型',
-    default: 0,
+    nullable: false,
   })
-  public media_type: MEDIA_TYPE;
+  public media_type: string;
 
   @Column({
     type: 'bool',
@@ -109,7 +105,7 @@ export class BlogMediaEntity {
     category: number,
     description: string,
     uid: number,
-    type: MEDIA_TYPE,
+    type: string,
   }) {
     this.update(opts);
     this.media_user_id = opts.uid;

@@ -1,0 +1,1 @@
+export const Media_Types = new Set<string>(['page', 'article']);
