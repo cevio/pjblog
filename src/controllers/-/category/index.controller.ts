@@ -10,9 +10,10 @@
 
 'use strict';
 
-import { GetConfigsController } from './get';
-import { PostConfigsController } from './post';
+import { AddCategoryController } from "./add";
+import { GetCategoriesController } from "./get";
+
 export default [
-  GetConfigsController,
-  PostConfigsController,
+  GetCategoriesController,
+  AddCategoryController,
 ]

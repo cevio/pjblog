@@ -42,7 +42,7 @@ export abstract class Cache<T extends string, P extends any[], R> extends Servic
     return this.Env.toPath(key.replace(/\//g, ':'));
   }
 
-  public async write(params: ExtractParamsFromString<T>, ...args: P) {
+  public async write(params?: ExtractParamsFromString<T>, ...args: P) {
     const { value, expire } = await Promise.resolve(this.execute(params, ...args));
     const key = this.makePath(params);
     await this.Storage.connection.set(key, value, expire);
