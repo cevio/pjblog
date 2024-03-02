@@ -10,10 +10,10 @@
 
 'use strict';
 
-import { DeleteCategoryController } from "./delete";
-import { UpdateCategoryController } from "./update";
+import { AddMediaCommentsController } from "./add";
+import { GetMediaCommentsController } from "./get";
 
 export default [
-  UpdateCategoryController,
-  DeleteCategoryController,
+  GetMediaCommentsController,
+  AddMediaCommentsController,
 ]

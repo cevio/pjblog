@@ -31,8 +31,8 @@ export abstract class Cache<T extends string, P extends any[], R> extends Servic
   private readonly toPath: PathFunction<Partial<ExtractParamsFromString<T>>>;
   public abstract execute(params: ExtractParamsFromString<T>, ...args: P): CacheResult<R> | Promise<CacheResult<R>>;
 
-  constructor(path: T, meta: Meta) {
-    super(meta);
+  constructor(path: T, meta: Meta, store?: Map<any, any>) {
+    super(meta, store);
     this.toPath = compile(path.replace(/\[([^\:]+)[^\]]+\]/g, ':$1'));
   }
 
