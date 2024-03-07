@@ -10,9 +10,9 @@
 
 'use strict';
 
-import { Component } from '@zille/core';
+import { Application } from '@zille/application';
 
-export abstract class Plugin extends Component {
+export abstract class Plugin extends Application {
   public abstract readonly cwd: string;
   public abstract readonly code: string;
   public abstract readonly version: string;

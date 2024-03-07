@@ -10,11 +10,10 @@
 
 'use strict';
 
-import { Component } from '@zille/core';
+import { Application } from '@zille/application';
 
-@Component.Injectable()
-export class DataBase extends Component {
+@Application.Injectable()
+export class DataBase extends Application {
   public readonly entities = new Set<Function>();
-  public initialize() { }
-  public terminate() { }
+  public setup() { }
 }

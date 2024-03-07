@@ -10,24 +10,24 @@
 
 'use strict';
 
-import { create } from '@zille/core';
+import { container } from '@zille/application';
 import { TypeORM } from '@zille/typeorm';
 import { Middleware } from 'koa';
 export const DataBaseConnnectionNameSpace = Symbol('DATABASE:CONNECTION');
 export const DataBaseConnnectionRollbackNameSpace = Symbol('DATABASE:CONNECTION:ROLLBACK');
 export function DataBaseMiddleware(transacte?: true): Middleware {
   return async (ctx, next) => {
-    const typeorm = await create(TypeORM);
-    const store = ctx.state['SERVICE:STORE'] as Map<any, any>;
+    const typeorm = await container.connect(TypeORM);
+    const store = ctx.__SERVICE_STORAGE__;
 
     if (transacte) {
       await typeorm.transaction(async (runner, rollback) => {
-        store.set(DataBaseConnnectionNameSpace, runner);
-        store.set(DataBaseConnnectionRollbackNameSpace, rollback);
+        store.addCache(DataBaseConnnectionNameSpace, runner);
+        store.addCache(DataBaseConnnectionRollbackNameSpace, rollback);
         await next();
       })
     } else {
-      store.set(DataBaseConnnectionNameSpace, typeorm.connection);
+      store.addCache(DataBaseConnnectionNameSpace, typeorm.connection);
       await next();
     }
   }

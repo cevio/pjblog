@@ -10,7 +10,7 @@
 
 'use strict';
 
-import { create } from "@zille/core";
+import { container } from "@zille/application";
 import { Middleware } from "koa";
 import { koaBody } from 'koa-body';
 import { BlogVariable } from "../applications/variable.app";
@@ -21,7 +21,7 @@ import { BlogVariable } from "../applications/variable.app";
  * @param next 
  */
 export const HttpBodyMiddleware: Middleware = async (ctx, next) => {
-  const configs = await create(BlogVariable);
+  const configs = await container.connect(BlogVariable);
   await koaBody({
     jsonStrict: false,
     jsonLimit: configs.get('bodyJSONLimit') + 'mb',

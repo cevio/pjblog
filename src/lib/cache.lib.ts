@@ -10,7 +10,7 @@
 
 'use strict';
 
-import { Service, Meta } from '@zille/service';
+import { Service } from '@zille/service';
 import { Storage } from '../applications/cache/cache.app';
 import { compile, PathFunction } from 'path-to-regexp';
 import { Env } from '../applications/env.app';
@@ -21,6 +21,7 @@ export type CacheResult<R> = {
   expire?: number,
 }
 
+@Service.Injectable()
 export abstract class Cache<T extends string, P extends any[], R> extends Service {
   @Service.Inject(Storage)
   private readonly Storage: Storage;
@@ -31,8 +32,8 @@ export abstract class Cache<T extends string, P extends any[], R> extends Servic
   private readonly toPath: PathFunction<Partial<ExtractParamsFromString<T>>>;
   public abstract execute(params: ExtractParamsFromString<T>, ...args: P): CacheResult<R> | Promise<CacheResult<R>>;
 
-  constructor(path: T, meta: Meta, store?: Map<any, any>) {
-    super(meta, store);
+  constructor(path: T, ctx: any) {
+    super(ctx);
     this.toPath = compile(path.replace(/\[([^\:]+)[^\]]+\]/g, ':$1'));
   }
 

@@ -30,7 +30,7 @@ interface LatestCommentRaw {
 
 @Service.Injectable()
 export class MediaService extends Service {
-  @Service.InjectStore(DataBaseConnnectionNameSpace)
+  @Service.Inject(DataBaseConnnectionNameSpace)
   private readonly conn: DataBaseConnection;
 
   private getRepository() {

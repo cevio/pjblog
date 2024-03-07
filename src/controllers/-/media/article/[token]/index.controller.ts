@@ -73,8 +73,8 @@ export default class extends Controller<'token'> {
       category: body.category,
       description: body.description,
     })))
-    const Article = await this.use(MediaArticleService);
-    const Tag = await this.use(MediaTagService);
+    const Article = await this.$use(MediaArticleService);
+    const Tag = await this.$use(MediaTagService);
     await Tag.update(...body.tags);
     await Article.add(body.markdown, body.source);
     return Response.json(Date.now())

@@ -11,7 +11,7 @@
 'use strict';
 
 import 'koa';
-import { Component } from '@zille/core';
+import { Application } from '@zille/application';
 import { BlogMediaEntity } from '../entities/media.entity';
 import { Controller } from '@zille/http-controller';
 
@@ -21,13 +21,12 @@ declare module 'koa' {
   }
 }
 
-@Component.Injectable()
-export class Media extends Component {
+@Application.Injectable()
+export class Media extends Application {
   public readonly types = new Set<string>(['page', 'article']);
   static readonly Middleware_Store_NameSpace = Symbol('middleware:store');
   public readonly deletions = new Map<string, Set<(media: BlogMediaEntity, store: Map<any, any>) => Promise<unknown>>>();
-  public initialize() { }
-  public terminate() { }
+  public setup() { }
 
   static readonly One = Controller.Context(ctx => ctx.media);
 

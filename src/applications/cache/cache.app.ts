@@ -12,7 +12,7 @@
 
 import fs from 'fs-extra';
 import { Configurator } from '@zille/configurator';
-import { Component } from '@zille/core';
+import { Application } from '@zille/application';
 import { BlogProps } from '../../global.types';
 import { resolve } from 'node:path';
 import { Env } from '../env.app';
@@ -23,18 +23,18 @@ import { BlogRedisCacheModel } from './redis';
 
 const { ensureDir } = fs;
 
-@Component.Injectable()
-export class Storage extends Component {
-  @Component.Inject(Configurator)
+@Application.Injectable()
+export class Storage extends Application {
+  @Application.Inject(Configurator)
   private readonly Configs: Configurator;
 
-  @Component.Inject(Env)
+  @Application.Inject(Env)
   private readonly Env: Env;
 
   public connection: Cacheable;
 
   static readonly namespace = Symbol('CACHE');
-  public async initialize() {
+  public async setup() {
     let target: Cacheable;
     const props = this.Configs.get<BlogProps['cache']>(Storage.namespace);
     switch (props.type) {
@@ -44,15 +44,17 @@ export class Storage extends Component {
         target = new BlogFileCacheModel(_directory);
         break;
       case 'redis':
-        const redis = await this.use(IORedis);
+        const redis = await this.$use(IORedis);
         target = new BlogRedisCacheModel(redis.connection);
         break;
     }
     if (target) this.connection = target;
+    return () => this.terminate();
   }
   public terminate() {
     if (this.connection) {
       this.connection.close();
+      this.connection = undefined;
     }
   }
 }

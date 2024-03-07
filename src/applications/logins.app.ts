@@ -10,14 +10,13 @@
 
 'use strict';
 
-import { Component } from '@zille/core';
+import { Application } from '@zille/application';
 import { LoginsProps } from '../global.types';
 
-@Component.Injectable()
-export class Logins extends Component {
+@Application.Injectable()
+export class Logins extends Application {
   private readonly stacks = new Map<string, LoginsProps>();
-  public initialize() { }
-  public terminate() { }
+  public setup() { }
 
   public has(id: string) {
     return this.stacks.has(id);

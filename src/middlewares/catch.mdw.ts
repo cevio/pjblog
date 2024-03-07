@@ -10,7 +10,7 @@
 
 'use strict';
 
-import { create } from '@zille/core';
+import { container } from '@zille/application';
 import { Context, Next } from 'koa';
 import { Logger } from '../applications/logger.app';
 
@@ -22,8 +22,8 @@ export async function JSONErrorCatch(ctx: Context, next: Next) {
       data: ctx.body,
     }
   } catch (e) {
-    const logger = await create(Logger);
-    logger.error(e.message);
+    const logger = await container.connect(Logger);
+    logger.error(e.stack);
     ctx.body = {
       status: e.status || ctx.status || 500,
       message: e.message,
@@ -35,8 +35,8 @@ export async function NormalErrorCatch(ctx: Context, next: Next) {
   try {
     await next();
   } catch (e) {
-    const logger = await create(Logger);
-    logger.error(e.message);
+    const logger = await container.connect(Logger);
+    logger.error(e.stack);
     ctx.status = e.status || ctx.status || 500;
     ctx.body = e.message;
   }

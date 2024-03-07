@@ -10,14 +10,12 @@
 
 'use strict';
 
-import { Controller } from "@zille/http-controller";
+import { createClassDecorator, hook } from "@zille/http-controller";
 import { SchemaBase } from "../schema/base";
 import { Schema } from "../schema/schema.lib";
 import { Group } from "./group";
 import { Path } from './path';
 import { SwaggerProps, SwaggerSpec } from "./types";
-import { Annotation } from '@zille/annotation';
-import { Meta } from '@zille/service';
 import { HTTPMethod } from 'find-my-way';
 
 export class Swagger extends Group {
@@ -35,21 +33,16 @@ export class Swagger extends Group {
   }
 
   static readonly namespace = Symbol('SWAGGER');
-  static readonly Definition = Annotation.createClassDecorator<[Group, (path: Path) => unknown], Meta>(
-    Swagger.namespace, () => new Meta(),
-    anno => {
-      const [group, callback] = anno.parameters;
-      const mount = (method: HTTPMethod, url: string) => {
-        const [path] = group.createPath(method, url);
-        callback(path);
-      }
-      anno.meta.on('created', (physicalPath: string) => {
-        const url = physicalPath.replace(/\[([^\]]+)\]/g, '{$1}');
-        const method = anno.meta.classes.get(Controller.NAMESPACE_METHOD).parameters[0] as HTTPMethod;
-        mount(method, url);
-      })
+  static readonly Definition = createClassDecorator<[Group, (path: Path) => unknown]>(Swagger.namespace, (target, group, fn) => {
+    const mount = (method: HTTPMethod, url: string) => {
+      const [path] = group.createPath(method, url);
+      fn(path);
     }
-  );
+    hook.onCreate(target, ({ physicalPath, methods }) => {
+      const url = physicalPath.replace(/\[([^\]]+)\]/g, '{$1}');
+      methods.forEach(method => mount(method, url));
+    })
+  });
 }
 
 export const swagger = new Swagger({

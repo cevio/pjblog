@@ -9,29 +9,46 @@
  */
 
 'use strict';
-
+import dayjs from 'dayjs';
+import fsextra from 'fs-extra';
 import { Configurator } from '@zille/configurator';
-import { Component } from '@zille/core';
+import { Application } from '@zille/application';
 import { TypeORM } from '@zille/typeorm';
 import { createRequire } from 'node:module';
-import { resolve } from 'node:path';
+import { resolve, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { BlogDataBaseProps } from '../global.types';
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const require = createRequire(import.meta.url);
+const { ensureDir } = fsextra;
 
-@Component.Injectable()
-export class Env extends Component {
-  @Component.Inject(Configurator)
+@Application.Injectable()
+export class Env extends Application {
+  @Application.Inject(Configurator)
   private readonly Configs: Configurator;
   public readonly cwd = process.cwd();
   public readonly version: string = require(resolve(__dirname, '../../package.json')).version;
-  public initialize() { }
-  public terminate() { }
+  public setup() { }
 
   public toPath(path: string) {
     const props = this.Configs.get<BlogDataBaseProps>(TypeORM.namespace);
     return `${props.entityPrefix || 'blog'}:${path}`;
+  }
+
+  public async getCurrentAttachmentDirectory() {
+    const dictionary = resolve(this.cwd, 'attachments', dayjs().format('YYYY-MM-DD'));
+    await ensureDir(dictionary);
+    return dictionary;
+  }
+
+  public getAttachmentRelativePath(absPath: string) {
+    const source = resolve(this.cwd, 'attachments');
+    return relative(source, absPath);
+  }
+
+  public getAttachmentAbsolutePath(relativePath: string) {
+    const source = resolve(this.cwd, 'attachments');
+    return resolve(source, relativePath);
   }
 }

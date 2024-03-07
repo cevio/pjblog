@@ -10,17 +10,17 @@
 
 'use strict';
 
-import { Component } from "@zille/core";
+import { Application } from "@zille/application";
 import { Variable } from "../lib/variable.lib";
 import { Storage } from "./cache/cache.app";
 import { SystemConfigs } from "../global.types";
 import { SystemConfigsSchema } from "../schemas/system.configs.schema";
 
-@Component.Injectable()
-export class BlogVariable extends Component {
+@Application.Injectable()
+export class BlogVariable extends Application {
   private variable: Variable<SystemConfigs>;
 
-  @Component.Inject(Storage)
+  @Application.Inject(Storage)
   private readonly cache: Storage;
 
   public get<U extends keyof SystemConfigs>(key: U): SystemConfigs[U] {
@@ -48,10 +48,8 @@ export class BlogVariable extends Component {
     return this.variable.update(key, value);
   }
 
-  public initialize() {
+  public setup() {
     this.variable = new Variable('system:configs', this.cache.connection, SystemConfigsSchema);
     return this.variable.initialize();
   }
-
-  public terminate() { }
 }

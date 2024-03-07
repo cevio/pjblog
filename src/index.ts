@@ -13,12 +13,12 @@
 // imports
 import exitHook from 'async-exit-hook';
 import { BlogProps } from './global.types';
-import { create, Component, destroy, destroyClass, ComponentConstructor } from '@zille/core';
+import { Application, container } from '@zille/application';
 import { Configurator } from '@zille/configurator';
 import { TypeORM } from '@zille/typeorm';
 import { Http } from '@zille/http';
 import { IORedis } from '@zille/ioredis';
-import { LoadControllers } from '@zille/http-controller';
+import { LoadControllers, Newable } from '@zille/http-controller';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { existsSync } from 'node:fs';
@@ -63,25 +63,25 @@ export * from './global.types';
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
 const controllers = resolve(__dirname, 'controllers');
 
-@Component.Injectable()
-class Blog extends Component {
+@Application.Injectable()
+class Blog extends Application {
 
-  @Component.Inject(Configurator)
+  @Application.Inject(Configurator)
   private readonly Configs: Configurator;
 
-  @Component.Inject(DataBase)
+  @Application.Inject(DataBase)
   private readonly DataBase: DataBase;
 
-  @Component.Inject(Logger)
+  @Application.Inject(Logger)
   private readonly Logger: Logger;
 
-  public async setup(options: BlogProps, plugins: ComponentConstructor<Plugin>[]) {
+  public async initialize(options: BlogProps, plugins: Newable[]) {
     /**
      * plugins setup
      */
     const directories = new Map<string, string>();
     for (let i = 0; i < plugins.length; i++) {
-      const plugin = await this.use(plugins[i]);
+      const plugin = await this.$use(plugins[i]);
       if (plugin.cwd && existsSync(plugin.cwd)) {
         const controller = resolve(plugin.cwd, 'controllers');
         if (existsSync(controller)) {
@@ -95,7 +95,7 @@ class Blog extends Component {
      */
     this.Configs.set(Storage.namespace, options.cache);
     this.Configs.set(IORedis.namespace, options.redis);
-    await this.use(Storage);
+    await this.$use(Storage);
 
     /**
      * Database setup
@@ -115,18 +115,18 @@ class Blog extends Component {
       synchronize: true,
       logging: false,
     });
-    await this.use(TypeORM);
+    await this.$use(TypeORM);
 
     /**
      * 全局变量
      */
-    await this.use(BlogVariable);
+    await this.$use(BlogVariable);
 
     /**
      * Http setup
      */
     this.Configs.set(Http.namespace, options.http);
-    const http = await this.use(Http);
+    const http = await this.$use(Http);
     this.Logger.http('http://127.0.0.1:' + options.http.port);
     await LoadControllers(controllers, http.app);
     this.Logger.debug(`System controllers -> \`${controllers}\``);
@@ -140,16 +140,15 @@ class Blog extends Component {
     this.Logger.info('PJBlog server started.');
   }
 
-  public initialize() { }
-  public terminate() { }
+  public setup() { }
 }
 
-export default (options: BlogProps, plugins: ComponentConstructor<Plugin>[] = []) => {
-  create(Blog).then(blog => {
-    exitHook(exit => destroy(blog).finally(exit));
-    return blog.setup(options, plugins);
+export default (options: BlogProps, plugins: Newable[] = []) => {
+  container.connect(Blog).then(blog => {
+    exitHook(exit => container.destroy(Blog).finally(exit));
+    return blog.initialize(options, plugins);
   }).catch(e => {
     console.error(e);
-    destroyClass(Blog).finally(() => process.exit(1));
+    container.destroy(Blog).finally(() => process.exit(1));
   });
 }

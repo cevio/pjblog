@@ -70,10 +70,10 @@ export default class extends Controller {
     const media = await this.media.add(body.title, body.category, body.description, me.id, 'article');
     store.set(Media.Middleware_Store_NameSpace, media);
 
-    const Article = await this.use(MediaArticleService);
+    const Article = await this.$use(MediaArticleService);
     const article = await Article.getOne();
     if (!article) throw new Exception(804, '文章不存在');
-    const Tag = await this.use(MediaTagService);
+    const Tag = await this.$use(MediaTagService);
     await Tag.update(...body.tags);
     await Article.save(article.update(body.markdown, body.source));
 

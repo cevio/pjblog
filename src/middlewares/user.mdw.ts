@@ -11,10 +11,9 @@
 'use strict';
 
 import { Middleware } from "koa";
-import { getService } from '@zille/service';
 import { UserService } from "../services/user.service";
 import { UserCache } from "../caches/user.cache";
-import { create } from "@zille/core";
+import { container } from "@zille/application";
 import { Storage } from "../applications/cache/cache.app";
 import { BlogUserEntity } from "../entities/user.entity";
 import { Controller } from '@zille/http-controller';
@@ -32,32 +31,32 @@ export const UserLoginInfoMiddleware: Middleware = async (ctx, next) => {
   if (!token) token = ctx.get('authorization');
   if (!token) return await next();
 
-  const store = ctx.state['SERVICE:STORE'] as Map<any, any>;
-  const user = await getService(UserService, store);
-  const userCache = await getService<UserCache>(UserCache, store);
-  const cache = await create(Storage);
+  const store = ctx.__SERVICE_STORAGE__;
+  const user = await store.connect(UserService);
+  const userCache = await store.connect(UserCache);
+  const cache = await store.connect(Storage);
 
   const key = user.createUserLoginTokenKeyPath(token);
   if (!(await cache.connection.exists(key))) return await next();
 
   const { value } = await cache.connection.get<{ value: string, relative_key: string }>(key);
   const _user = await userCache.read({ account: value });
-  ctx.state.user = _user;
+  ctx.user = _user;
 
   await next();
 }
 
 export const UserHasLoginMiddleware: Middleware = async (ctx, next) => {
   await UserLoginInfoMiddleware(ctx, async () => {
-    if (!ctx.state.user) throw new Exception(401, '用户未登录');
-    if (ctx.state.user.forbiden) throw new Exception(403, '用户禁止登录');
+    if (!ctx.user) throw new Exception(401, '用户未登录');
+    if (ctx.user.forbiden) throw new Exception(403, '用户禁止登录');
     return await next();
   })
 }
 
 export const UserAdminableMiddleware: Middleware = async (ctx, next) => {
   await UserHasLoginMiddleware(ctx, async () => {
-    if (ctx.state.user.admin) return await next();
+    if (ctx.user.admin) return await next();
     throw new Exception(405, '非管理员禁止登录');
   })
 }

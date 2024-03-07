@@ -11,7 +11,6 @@
 'use strict';
 
 import { Cache } from "../lib/cache.lib";
-import { Meta } from '@zille/service';
 import { UserService } from "../services/user.service";
 import { Exception } from "../lib/exception";
 import { BlogUserEntity } from "../entities/user.entity";
@@ -24,8 +23,8 @@ export class UserCache extends Cache<typeof path, [], BlogUserEntity> {
   @Cache.Inject(UserService)
   private readonly service: UserService;
 
-  constructor(meta: Meta) {
-    super(path, meta);
+  constructor(ctx: any) {
+    super(path, ctx);
   }
 
   public async execute(params: ExtractParamsFromString<typeof path>) {

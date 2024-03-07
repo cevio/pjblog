@@ -21,7 +21,7 @@ import { Storage } from '../applications/cache/cache.app';
 
 @Service.Injectable()
 export class UserService extends Service {
-  @Service.InjectStore(DataBaseConnnectionNameSpace)
+  @Service.Inject(DataBaseConnnectionNameSpace)
   private readonly conn: DataBaseConnection;
 
   @Service.Inject(BlogVariable)

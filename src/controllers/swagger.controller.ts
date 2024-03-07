@@ -45,7 +45,7 @@ export default class extends Controller {
   public async main() {
     const allow = this.configs.get('swagger');
     if (!allow) throw new Exception(404, 'Swagger not allowed');
-    const url = this.toPath(SwaggerDataPage);
+    const url = this.$toPath(SwaggerDataPage);
     const template = render({
       title: 'PJBlog Geek API',
       api: url,

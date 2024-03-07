@@ -11,7 +11,6 @@
 'use strict';
 
 import { Cache } from "../lib/cache.lib";
-import { Meta } from '@zille/service';
 import { CategoryService } from "../services/category.service";
 
 const path = '/categories';
@@ -26,8 +25,8 @@ export class CategoryCache extends Cache<typeof path, [], {
   @Cache.Inject(CategoryService)
   private readonly service: CategoryService;
 
-  constructor(meta: Meta) {
-    super(path, meta);
+  constructor(ctx: any) {
+    super(path, ctx);
   }
 
   public async execute() {

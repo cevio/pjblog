@@ -20,10 +20,10 @@ import { Media } from "../applications/media.app";
 
 @Service.Injectable()
 export class MediaTagService extends Service {
-  @Service.InjectStore(DataBaseConnnectionNameSpace)
+  @Service.Inject(DataBaseConnnectionNameSpace)
   private readonly conn: DataBaseConnection;
 
-  @Service.InjectStore(Media.Middleware_Store_NameSpace)
+  @Service.Inject(Media.Middleware_Store_NameSpace)
   private readonly media: BlogMediaEntity;
 
   private getRepository() {

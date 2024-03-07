@@ -13,7 +13,7 @@
 import { SchemaBase } from "./schema/base";
 import { Cacheable } from "../applications/cache/impl";
 import { Env } from "../applications/env.app";
-import { create } from "@zille/core";
+import { container } from "@zille/application";
 
 export class Variable<T extends object = any> {
   public readonly state = new Map<keyof T, any>();
@@ -24,7 +24,7 @@ export class Variable<T extends object = any> {
   ) { }
 
   private async createPathName() {
-    const env = await create(Env);
+    const env = await container.connect(Env);
     return env.toPath('variable:' + this.namespace + ':state');
   }
 

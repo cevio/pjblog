@@ -17,7 +17,7 @@ import { BlogCategoryEntity } from "../entities/category.entity";
 
 @Service.Injectable()
 export class CategoryService extends Service {
-  @Service.InjectStore(DataBaseConnnectionNameSpace)
+  @Service.Inject(DataBaseConnnectionNameSpace)
   private readonly conn: DataBaseConnection;
 
   private getRepository() {

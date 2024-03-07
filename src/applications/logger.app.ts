@@ -13,13 +13,13 @@
 import dayjs from 'dayjs';
 import winston, { format } from 'winston';
 import WinstonDailyFiler from 'winston-daily-rotate-file';
-import { Component } from '@zille/core';
+import { Application } from '@zille/application';
 import { Env } from './env.app';
 import { resolve } from 'node:path';
 
-@Component.Injectable()
-export class Logger extends Component {
-  @Component.Inject(Env)
+@Application.Injectable()
+export class Logger extends Application {
+  @Application.Inject(Env)
   private readonly Env: Env;
 
   private current: winston.Logger;
@@ -64,27 +64,7 @@ export class Logger extends Component {
     return this.current?.silly(msg, ...meta);
   }
 
-  public emerg(msg: string, ...meta: any[]) {
-    return this.current?.emerg(msg, ...meta);
-  }
-
-  public alert(msg: string, ...meta: any[]) {
-    return this.current?.alert(msg, ...meta);
-  }
-
-  public crit(msg: string, ...meta: any[]) {
-    return this.current?.crit(msg, ...meta);
-  }
-
-  public warning(msg: string, ...meta: any[]) {
-    return this.current?.warning(msg, ...meta);
-  }
-
-  public notice(msg: string, ...meta: any[]) {
-    return this.current?.notice(msg, ...meta);
-  }
-
-  public initialize() {
+  public setup() {
     this.current = winston.createLogger({
       level: 'debug',
       format: format.combine(
@@ -114,9 +94,11 @@ export class Logger extends Component {
         }),
       ],
     })
+    return () => this.terminate();
   }
 
   public terminate() {
     this.current.destroy();
+    this.current = undefined;
   }
 }
