@@ -1,3 +1,15 @@
+/**
+ * Copyright (c) PJBlog Platforms, net. and affiliates.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ *
+ * @Author evio<evio@vip.qq.com>
+ * @Website https://www.pjhome.net
+ */
+
+'use strict';
+
 import createFileMD5 from 'md5-file';
 import fsextra from 'fs-extra';
 
@@ -11,10 +23,11 @@ import { Schema } from "../../../lib/schema/schema.lib";
 import { AttachmentSchema } from "../../../schemas/attachment.schema";
 import { Files } from 'formidable';
 import { Env } from "../../../applications/env.app";
-import { AttachmentyService } from "../../../services/attachment.service";
+import { AttachmentService } from "../../../services/attachment.service";
 import { BlogAttachmentEntity } from "../../../entities/attachment.entity";
 import { statSync, existsSync } from 'node:fs';
 import { extname, resolve } from 'node:path';
+import { AttachmentCache } from '../../../caches/attachment.cache';
 
 const { moveSync, unlinkSync } = fsextra;
 
@@ -37,15 +50,16 @@ export class AddAttachmentController extends Controller {
   @Controller.Inject(Env)
   private readonly env: Env;
 
-  @Controller.Inject(AttachmentyService)
-  private readonly service: AttachmentyService;
+  @Controller.Inject(AttachmentService)
+  private readonly service: AttachmentService;
 
   @Controller.Inject(DataBaseConnnectionRollbackNameSpace)
   private readonly rollback: (roll: () => unknown) => number;
 
-  public async main(
-    @Controller.Files files: Files
-  ) {
+  @Controller.Inject(AttachmentCache)
+  private readonly cache: AttachmentCache;
+
+  public async main(@Controller.Files files: Files) {
     const dictionary = await this.env.getCurrentAttachmentDirectory();
     const entities: BlogAttachmentEntity[] = [];
     for (const key in files) {
@@ -56,21 +70,23 @@ export class AddAttachmentController extends Controller {
         const stat = statSync(chunk.filepath);
         if (stat.isFile()) {
           const md5 = await createFileMD5(chunk.filepath);
-          const fileextname = extname(chunk.originalFilename);
-          const targetFilename = resolve(dictionary, md5 + fileextname);
-          const exists = existsSync(targetFilename);
-          moveSync(chunk.filepath, targetFilename, { overwrite: true });
-          this.rollback(() => {
-            if (!exists) {
-              unlinkSync(targetFilename);
-            }
-          })
-          const relative = await this.env.getAttachmentRelativePath(targetFilename);
           let target = await this.service.getOneByMd5(md5);
-          const args = [relative, stat.size, chunk.mimetype, md5] as const;
+
           if (!target) {
-            target = await this.service.add(...args);
+            const fileextname = extname(chunk.originalFilename);
+            const targetFilename = resolve(dictionary, md5 + fileextname);
+            const exists = existsSync(targetFilename);
+            moveSync(chunk.filepath, targetFilename, { overwrite: true });
+            this.rollback(() => {
+              if (!exists) {
+                unlinkSync(targetFilename);
+              }
+            })
+            const relative = this.env.getAttachmentRelativePath(targetFilename);
+            target = await this.service.add(relative, stat.size, chunk.mimetype, md5);
+            await this.cache.write({ id: target.id });
           }
+
           entities.push(target);
         }
       }

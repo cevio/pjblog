@@ -10,10 +10,10 @@
 
 'use strict';
 
-import { AddAttachmentController } from "./add";
-import { GetAttachmentsController } from "./get";
+import { DeleteAttachmentController } from "./delete";
+import { GetAttachmentController } from "./get";
 
 export default [
-  AddAttachmentController,
-  GetAttachmentsController,
+  DeleteAttachmentController,
+  GetAttachmentController,
 ]
