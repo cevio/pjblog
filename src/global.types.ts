@@ -15,6 +15,7 @@ import { Context } from 'koa';
 import { DataSource, QueryRunner } from 'typeorm';
 
 export type DataBaseConnection = DataSource | QueryRunner;
+export type AcceptWebPageNameSpace = 'home' | 'detail' | 'archive';
 
 export interface BlogProps {
   cache: {

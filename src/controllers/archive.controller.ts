@@ -18,15 +18,15 @@ import { Themes } from '../applications/theme.app';
 import { TransformStringToNumber } from '../utils';
 import { DataBaseMiddleware } from '../middlewares/database.mdw';
 import { Exception } from '../lib/exception';
-import { HomePage } from '../lib/theme/home.lib';
+import { ArchivePage } from '../lib/theme/archive.lib';
 
 @Controller.Injectable()
 @Controller.Method('GET')
 @Controller.Middleware(NormalErrorCatch, DataBaseMiddleware())
 @Swagger.Definition(SwaggerWithWebPage, path => {
   path
-    .summary('主页')
-    .description('主题 - 主页')
+    .summary('归档')
+    .description('主题 - 归档')
     .produces('application/json')
 
   path.addResponse(200, '请求成功').schema(createApiSchema(new Schema.String()));
@@ -35,15 +35,11 @@ export default class extends Controller {
   @Controller.Inject(Themes)
   private readonly themes: Themes;
 
-  public async main(
-    @Controller.Query('page', TransformStringToNumber(1)) page: number,
-    @Controller.Query('type') type: string,
-    @Controller.Query('category', TransformStringToNumber(0)) category: number,
-  ) {
+  public async main(@Controller.Query('page', TransformStringToNumber(1)) page: number) {
     const Theme = this.themes.current;
-    if (!Theme.has('home')) throw new Exception(400, '缺少主题文件');
-    const theme = await this.$use(Theme.get('home') as Newable<HomePage>);
-    const state = await Promise.resolve(theme.state(page, type, category));
+    if (!Theme.has('archive')) throw new Exception(400, '缺少主题文件');
+    const theme = await this.$use(Theme.get('archive') as Newable<ArchivePage>);
+    const state = await Promise.resolve(theme.state(page));
     return new Response()
       .setData(await Promise.resolve(theme.render(state)))
       .setType('.html')

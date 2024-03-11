@@ -42,6 +42,10 @@ export * from './applications/database.app';
 export * from './applications/env.app';
 export * from './applications/logger.app';
 export * from './applications/cache/cache.app';
+export * from './applications/logins.app';
+export * from './applications/media.app';
+export * from './applications/theme.app';
+export * from './applications/variable.app';
 
 export * from './entities/attachment.entity';
 export * from './entities/category.entity';
@@ -52,12 +56,47 @@ export * from './entities/media.tag.entity';
 export * from './entities/user.entity';
 
 export * from './middlewares/catch.mdw';
+export * from './middlewares/database.mdw';
+export * from './middlewares/http.body.mdw';
+export * from './middlewares/media.mdw';
+export * from './middlewares/user.mdw';
 
 export * from './lib/plugin.lib';
 export * from './lib/cache.lib';
 export * from './lib/schema/schema.lib';
+export * from './lib/exception';
+export * from './lib/swagger/swagger.lib';
+export * from './lib/variable.lib';
+export * from './lib/theme/home.lib';
+export * from './lib/theme/detail.lib';
+export * from './lib/theme/archive.lib';
 
+export * from './caches/attachment.cache';
+export * from './caches/category.cache';
+export * from './caches/user.cache';
+
+export * from './schemas/attachment.schema';
+export * from './schemas/category.schema';
+export * from './schemas/comment.schema';
+export * from './schemas/media.schema';
+export * from './schemas/system.configs.schema';
+export * from './schemas/user.schema';
+
+export * from './services/attachment.service';
+export * from './services/category.service';
+export * from './services/media.article.service';
+export * from './services/media.comment.service';
+export * from './services/media.service';
+export * from './services/media.tag.service';
+export * from './services/user.service';
+
+export * from './utils';
 export * from './global.types';
+
+// controllers
+export { default as HomeController } from './controllers/index.controller';
+export { default as ArchiveController } from './controllers/archive.controller';
+export { default as DetailController } from './controllers/[token]/index.controller';
 
 // main code
 const __dirname = fileURLToPath(new URL('.', import.meta.url));
@@ -75,13 +114,15 @@ class Blog extends Application {
   @Application.Inject(Logger)
   private readonly Logger: Logger;
 
-  public async initialize(options: BlogProps, plugins: Newable[]) {
+  public async initialize(options: BlogProps, plugins: Newable<Plugin>[]) {
     /**
      * plugins setup
      */
     const directories = new Map<string, string>();
+    const _plugins: Plugin[] = [];
     for (let i = 0; i < plugins.length; i++) {
       const plugin = await this.$use(plugins[i]);
+      _plugins.push(plugin);
       if (plugin.cwd && existsSync(plugin.cwd)) {
         const controller = resolve(plugin.cwd, 'controllers');
         if (existsSync(controller)) {
@@ -137,13 +178,23 @@ class Blog extends Application {
       this.Logger.debug(`Plugin controllers -> \`${directory}\``);
     }
 
+    // plugin setup
+    for (let i = 0; i < _plugins.length; i++) {
+      const plugin = _plugins[i];
+      await plugin.initConfigs();
+      const rollback = await Promise.resolve(plugin.initialize());
+      if (typeof rollback === 'function') {
+        plugin.uninstall = rollback;
+      }
+    }
+
     this.Logger.info('PJBlog server started.');
   }
 
   public setup() { }
 }
 
-export default (options: BlogProps, plugins: Newable[] = []) => {
+export default (options: BlogProps, plugins: Newable<Plugin>[] = []) => {
   container.connect(Blog).then(blog => {
     exitHook(exit => container.destroy(Blog).finally(exit));
     return blog.initialize(options, plugins);
